@@ -1,0 +1,793 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CRM net2phone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#002540; --slate:#435E72; --line:#EFEFEF; --line2:#C5CDD4;
+  --bg:#F5F5F5; --white:#FFFFFF;
+  --blue:#0095FF; --purple:#740CE8; --pink:#FE0687;
+  --t-blue:#CCEAFF; --t-purple:#E0CAFA; --t-pink:#FFDAED;
+  --radius:10px; --radius-lg:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:'Open Sans','Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;line-height:1.45;color:var(--navy);background:var(--bg)}
+button,input,select,textarea{font-family:inherit;font-size:14px;color:var(--navy)}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.app{display:flex;min-height:100vh}
+.side{width:240px;flex:0 0 240px;background:var(--navy);display:flex;flex-direction:column;gap:4px;padding:28px 16px;position:sticky;top:0;height:100vh}
+.brand{padding:8px 12px 30px}
+.brand img{width:132px;height:auto;display:block}
+.brand small{display:block;color:var(--line2);font-size:11px;font-weight:600;letter-spacing:1.4px;margin-top:10px}
+.nav-btn{display:flex;align-items:center;gap:12px;width:100%;height:44px;padding:0 12px;border:0;border-radius:var(--radius);background:transparent;color:var(--line2);font-weight:600;text-align:left}
+.nav-btn:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav-btn[aria-current="page"]{background:rgba(255,255,255,.12);color:#fff;box-shadow:inset 3px 0 0 var(--blue)}
+.nav-btn .count{margin-left:auto;font-size:12px;background:rgba(255,255,255,.12);padding:1px 8px;border-radius:999px}
+.side-foot{margin-top:auto;border-top:1px solid var(--slate);padding-top:14px;display:flex;flex-direction:column;gap:12px}
+.user{display:flex;gap:10px;align-items:center;padding:0 12px}
+.user b{color:#fff;font-size:13px;display:block}
+.user span{color:var(--line2);font-size:12px}
+.reset{background:transparent;border:1px solid var(--slate);color:var(--line2);border-radius:var(--radius);height:40px;font-weight:600;font-size:13px}
+.reset:hover{color:#fff;border-color:var(--line2)}
+
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.topbar{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;padding:18px 36px;background:#fff;border-bottom:1px solid var(--line)}
+.search{display:flex;align-items:center;gap:10px;background:var(--bg);border:1px solid var(--line);border-radius:var(--radius);padding:0 14px;height:44px;flex:1 1 280px;max-width:480px}
+.search input{border:0;background:transparent;outline:none;flex:1;height:40px}
+.status{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;background:var(--t-blue);padding:8px 12px;border-radius:999px}
+.top-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.lang{display:flex;align-items:center;gap:6px;height:40px;padding:0 10px;border:1px solid var(--line2);border-radius:var(--radius);color:var(--slate)}
+.lang select{border:0;background:transparent;font-weight:600;color:var(--navy);height:36px;cursor:pointer}
+.status i{width:8px;height:8px;border-radius:4px;background:var(--navy)}
+
+.content{padding:32px 36px 48px;display:flex;flex-direction:column;gap:24px;max-width:1400px;width:100%}
+.head{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between}
+.head h1{margin:0;font-size:28px;font-weight:800;line-height:1.2}
+.head p{margin:4px 0 0;color:var(--slate)}
+.head-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+.btn{white-space:nowrap;height:44px;padding:0 18px;border-radius:var(--radius);font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line2);background:#fff}
+.btn:hover{border-color:var(--navy)}
+.btn.primary{background:var(--navy);color:#fff;border-color:var(--navy)}
+.btn.primary:hover{background:#0a3557}
+.btn.danger{color:#B0004F;border-color:#F2B8D2}
+.btn.sm{height:36px;padding:0 12px;font-size:13px}
+.link{background:none;border:0;padding:0;color:var(--purple);font-weight:600;text-align:left}
+.link:hover{text-decoration:underline}
+
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--radius-lg)}
+.pad{padding:24px}
+.card h2{margin:0 0 12px;font-size:18px;font-weight:700}
+
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.kpi{padding:20px;display:flex;flex-direction:column;gap:6px;text-align:left;border:1px solid var(--line);background:#fff;border-radius:var(--radius-lg)}
+.kpi:hover{border-color:var(--line2)}
+.kpi span{color:var(--slate);font-size:13px;font-weight:600}
+.kpi strong{font-size:32px;font-weight:800;line-height:1.1}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:820px}
+th{text-align:left;color:var(--slate);font-size:12px;font-weight:700;padding:14px 12px;letter-spacing:.3px}
+th:first-child,td:first-child{padding-left:20px}
+th:last-child,td:last-child{padding-right:20px}
+td{padding:12px;border-top:1px solid var(--line);vertical-align:middle;white-space:nowrap}
+tbody tr:hover{background:#FAFAFA}
+.who{display:flex;align-items:center;gap:12px}
+.av{width:34px;height:34px;border-radius:50%;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--navy)}
+.av.lg{width:56px;height:56px;font-size:18px;font-weight:800}
+.muted{color:var(--slate)}
+.num{font-variant-numeric:tabular-nums}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--line);white-space:nowrap}
+.t-blue{background:var(--t-blue)} .t-purple{background:var(--t-purple)} .t-pink{background:var(--t-pink)} .t-grey{background:var(--line)}
+.row-actions{display:flex;gap:6px;justify-content:flex-end}
+.icon-btn{width:36px;height:36px;border-radius:8px;border:1px solid transparent;background:transparent;display:inline-flex;align-items:center;justify-content:center;color:var(--slate)}
+.icon-btn:hover{background:var(--bg);color:var(--navy);border-color:var(--line)}
+
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.chip{height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--line2);background:#fff;font-weight:600;font-size:13px}
+.chip[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+.companies{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.company{padding:20px;display:flex;flex-direction:column;gap:14px}
+.company-top{display:flex;gap:12px;align-items:center}
+.logo-sq{width:42px;height:42px;border-radius:10px;background:var(--bg);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px}
+.company-meta{display:flex;justify-content:space-between;color:var(--slate);font-size:13px;gap:8px}
+.company-foot{display:flex;gap:8px;border-top:1px solid var(--line);padding-top:12px}
+
+.board{display:grid;grid-template-columns:repeat(5,minmax(220px,1fr));gap:14px;overflow-x:auto;padding-bottom:6px}
+.col{background:var(--line);border-radius:var(--radius-lg);padding:12px;display:flex;flex-direction:column;gap:10px;min-height:240px;transition:background .15s}
+.col.over{background:var(--t-blue)}
+.col-head{display:flex;justify-content:space-between;align-items:baseline;font-weight:700;font-size:13px;padding:4px 4px 2px}
+.col-head small{color:var(--slate);font-weight:600}
+.deal{background:#fff;border-radius:var(--radius);padding:14px;display:flex;flex-direction:column;gap:4px;border:1px solid transparent;cursor:grab;text-align:left;width:100%}
+.deal:hover{border-color:var(--line2)}
+.deal.dragging{opacity:.5}
+.deal b{font-size:14px}
+.deal .amt{font-weight:700;font-size:13px;margin-top:4px}
+
+.acts{display:flex;flex-direction:column}
+.act{display:flex;gap:14px;align-items:center;padding:14px 0;border-top:1px solid var(--line)}
+.act:first-child{border-top:0}
+.act .body{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.act .body b{font-weight:600}
+.acts.strike .act.done .body b{text-decoration:line-through;color:var(--slate)}
+.act input[type=checkbox]{width:20px;height:20px;accent-color:var(--navy);flex:0 0 auto}
+.act .when{color:var(--slate);font-size:13px;white-space:nowrap}
+.act .when.late{color:#B0004F;font-weight:600}
+
+.profile{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.profile-card{flex:1 1 320px;max-width:400px;display:flex;flex-direction:column;gap:18px}
+.profile-main{flex:999 1 420px;min-width:0;display:flex;flex-direction:column;gap:20px}
+.fields{display:flex;flex-direction:column;gap:14px;border-top:1px solid var(--line);padding-top:18px}
+.fields div{display:flex;flex-direction:column;gap:2px}
+.fields span{color:var(--slate);font-size:12px;font-weight:600}
+.fields b{font-weight:600;word-break:break-word}
+.back{display:inline-flex;align-items:center;gap:6px;background:none;border:0;padding:0;color:var(--slate);font-weight:600}
+.back:hover{color:var(--navy)}
+
+label.f{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:13px}
+.f input,.f select,.f textarea{height:44px;border:1px solid var(--line2);border-radius:var(--radius);padding:0 12px;background:#fff;font-weight:400}
+.f textarea{height:auto;padding:10px 12px;resize:vertical;min-height:88px}
+.f input:focus,.f select:focus,.f textarea:focus{border-color:var(--navy);outline:none;box-shadow:0 0 0 3px var(--t-blue)}
+.form-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.err{color:#B0004F;font-size:12px;font-weight:600;min-height:16px}
+
+.overlay{position:fixed;inset:0;background:rgba(0,37,64,.45);display:flex;justify-content:flex-end;z-index:40;animation:fade .15s ease}
+.drawer{width:100%;max-width:460px;background:#fff;height:100%;display:flex;flex-direction:column;animation:slide .2s ease}
+.drawer-head{display:flex;justify-content:space-between;align-items:center;padding:24px 28px 8px}
+.drawer-head h2{margin:0;font-size:22px;font-weight:800}
+.drawer-body{padding:16px 28px;display:flex;flex-direction:column;gap:14px;overflow-y:auto;flex:1}
+.drawer-foot{padding:16px 28px 24px;display:flex;gap:12px;border-top:1px solid var(--line)}
+.drawer-foot .btn{flex:1}
+@keyframes fade{from{opacity:0}}
+@keyframes slide{from{transform:translateX(24px);opacity:.6}}
+
+.empty{padding:40px 24px;text-align:center;color:var(--slate);display:flex;flex-direction:column;gap:12px;align-items:center}
+.empty b{color:var(--navy);font-size:16px}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:12px 18px;border-radius:var(--radius);font-weight:600;z-index:60;box-shadow:0 8px 24px rgba(0,37,64,.25);animation:fade .2s ease}
+
+@media (max-width:1100px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.grid2{grid-template-columns:1fr}}
+@media (max-width:860px){
+  .app{flex-direction:column}
+  .side{width:100%;flex:none;height:auto;position:static;flex-direction:row;flex-wrap:wrap;align-items:center;padding:12px}
+  .brand{padding:6px 12px;flex:1 0 100%}
+  .brand small{display:none}
+  .nav-btn{width:auto;flex:1 1 auto}
+  .nav-btn .count{display:none}
+  .user{display:none}
+  .side-foot{flex:1 0 100%;flex-direction:row;justify-content:space-between;align-items:center;padding-top:10px}
+  .topbar,.content{padding-left:16px;padding-right:16px}
+  .form-row{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="side" data-i18n-aria="navMain">
+    <div class="brand">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA1oAAACmCAYAAADDGv5hAAAWfmNhQlgAABZ+anVtYgAAAB5qdW1kYzJwYQARABCAAACqADibcQNjMnBhAAAAFlhqdW1iAAAAR2p1bWRjMm1hABEAEIAAAKoAOJtxA3VybjpjMnBhOmViNmY2Njc3LTdiYjQtNDAyMi05YWJmLWRhOGE3N2RhOTJhYgAAAAOTanVtYgAAAClqdW1kYzJhcwARABCAAACqADibcQNjMnBhLmFzc2VydGlvbnMAAAAAuGp1bWIAAABEanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5pbmdyZWRpZW50LnYzAAAAABhjMnNo20xgjG+q0hD6Jm4897VtqQAAAGxjYm9yo2lkYzpmb3JtYXRpaW1hZ2UvcG5namluc3RhbmNlSUR4LHhtcDppaWQ6YmMzNjYwZmEtY2I0ZC00MGNiLWFjMWUtZWEzZjk0MzAxNWQzbHJlbGF0aW9uc2hpcGhwYXJlbnRPZgAAAeJqdW1iAAAAQWp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuYWN0aW9ucy52MgAAAAAYYzJzaGj68Ec9E8EJxMWm5r2Y2SUAAAGZY2JvcqJnYWN0aW9uc4KiZmFjdGlvbmtjMnBhLm9wZW5lZGpwYXJhbWV0ZXJzoWtpbmdyZWRpZW50c4GiY3VybHgtc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5pbmdyZWRpZW50LnYzZGhhc2hYIK6n7nEAbVvg0MHTkS3gomj7IvuO0hrHiFc4aDhIkdFzpGZhY3Rpb254HWNvbS5hbnRocm9waWMuY2xhdWRlLnByb3ZpZGVkanBhcmFtZXRlcnOheB9jb20uYW50aHJvcGljLm9yaWdpbi1jb25maWRlbmNlZ3Vua25vd25rZGVzY3JpcHRpb254ZkNsYXVkZSBwcm92aWRlZCB0aGlzIGZpbGUgYXQgdGhlIHJlcXVlc3Qgb2YgYSB1c2VyIGFuZCBtYXkgaGF2ZSBjcmVhdGVkIG9yIG1vZGlmaWVkIHRoZSBmaWxlIGNvbnRlbnRzLm1zb2Z0d2FyZUFnZW50oWRuYW1lZkNsYXVkZXJhbGxBY3Rpb25zSW5jbHVkZWT1AAAAyGp1bWIAAABAanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5oYXNoLmRhdGEAAAAAGGMyc2g2Mmam/uy6SVOFkOhIThHnAAAAgGNib3KlY2FsZ2ZzaGEyNTZjcGFkTQAAAAAAAAAAAAAAAABkaGFzaFggu1ARTdm1qNzTiybxGG9chbvjgb/XdgJBbX8ze5g9xJRkbmFtZW5qdW1iZiBtYW5pZmVzdGpleGNsdXNpb25zgaJlc3RhcnQYIWZsZW5ndGgZFooAAAI+anVtYgAAACdqdW1kYzJjbAARABCAAACqADibcQNjMnBhLmNsYWltLnYyAAAAAg9jYm9ypWNhbGdmc2hhMjU2aXNpZ25hdHVyZXhNc2VsZiNqdW1iZj0vYzJwYS91cm46YzJwYTplYjZmNjY3Ny03YmI0LTQwMjItOWFiZi1kYThhNzdkYTkyYWIvYzJwYS5zaWduYXR1cmVqaW5zdGFuY2VJRHgseG1wOmlpZDoxYTMwNTY3Yi0yNzJmLTQ2YTEtOGVmOS05MDMwOWM2MWU1N2JyY3JlYXRlZF9hc3NlcnRpb25zg6JjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFggrqfucQBtW+DQwdORLeCiaPsi+47SGseIVzhoOEiR0XOiY3VybHgqc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5hY3Rpb25zLnYyZGhhc2hYICe/GvXjWoojdXjDxrCtxWHNaM/Lwq9G+n0CKkc0NLCwomN1cmx4KXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaGFzaC5kYXRhZGhhc2hYIBHR7WskM2Sl3Txs25VGJ568de76dM5JqJKLJT5WXtNrdGNsYWltX2dlbmVyYXRvcl9pbmZvo2RuYW1lb0FudGhyb3BpYyBGaWxlc2d2ZXJzaW9uZTEuMC4wa3NwZWNWZXJzaW9uZTIuNC4wAAAQOGp1bWIAAAAoanVtZGMyY3MAEQAQgAAAqgA4m3EDYzJwYS5zaWduYXR1cmUAAAAQCGNib3LShFkCEqIBJhghWQIKMIICBjCCAY2gAwIBAgIUQOWgCu7COdC+uIP6BkIFPWdVEwAwCgYIKoZIzj0EAwMwSTEXMBUGA1UEChMOQW50aHJvcGljLCBQQkMxLjAsBgNVBAMTJUFudGhyb3BpYyBDb250ZW50IENyZWRlbnRpYWxzIFJvb3QgQ0EwHhcNMjYwODA3MTg0MzU2WhcNMjgwODA2MTk0MzU2WjBEMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEpMCcGA1UEAxMgQW50aHJvcGljIENsYXVkZSBDb250ZW50IFNpZ25pbmcwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAASYegpry1AYBRTVNL1CpTlbROnY3dey+UrsF9C3phYrATN3ZHf93Mo8RQN0KOUuOn19P4oWNFWe5n2/She9N7eTo1gwVjAOBgNVHQ8BAf8EBAMCB4AwFQYDVR0lBA4wDAYKKwYBBAGD6F4CATAMBgNVHRMBAf8EAjAAMB8GA1UdIwQYMBaAFM5R4gSBTmRbI/jjxM+aPpzB11zCMAoGCCqGSM49BAMDA2cAMGQCMDFzHRSeAXrSy1WOzkbhPZ6Km2wGTmZ/2gK18k8BQGXyqz88Rdrz6CTX9flAnYNVxgIwcF9c3fVhqmJKpi+UhasNUMko69cyX6STPfta3Q8EjyzDjzoyrol46FP6VFHhvUcJoWNwYWRZDZ4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA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" alt="net2phone">
+      <small>CRM</small>
+    </div>
+    <div id="nav" style="display:contents"></div>
+    <div class="side-foot">
+      <div class="user">
+        <div class="av t-purple">LG</div>
+        <div><b>Laura Gómez</b><span data-i18n="role"></span></div>
+      </div>
+      <button class="reset" type="button" data-action="reset" data-i18n="reset"></button>
+    </div>
+  </nav>
+
+  <div class="main">
+    <header class="topbar">
+      <label class="search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#435E72" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <span class="sr-only" data-i18n="search"></span>
+        <input id="search" type="search" data-i18n-ph="searchPh" autocomplete="off">
+      </label>
+      <div class="top-right"><span class="status"><i></i><span data-i18n="connected"></span></span><label class="lang"><span class="sr-only" data-i18n="language"></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"/></svg><select id="lang"><option value="es">Español</option><option value="en">English</option><option value="pt">Português</option></select></label></div>
+    </header>
+    <main class="content" id="view" tabindex="-1"></main>
+  </div>
+</div>
+<div id="layer"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* =========================================================
+     TRADUCCIONES / TRANSLATIONS / TRADUÇÕES
+     ========================================================= */
+  const I18N = {
+    es: {
+      locale: 'es-AR', navMain: 'Navegación principal', role: 'Ejecutiva comercial', reset: 'Restablecer datos de demo',
+      search: 'Buscar', searchPh: 'Buscar por nombre, teléfono o empresa…', connected: 'Conectado a uContact', language: 'Idioma',
+      tabs: { inicio: 'Inicio', contactos: 'Contactos', empresas: 'Empresas', negocios: 'Negocios', actividades: 'Actividades' },
+      hello: 'Hola, Laura', helloSub: 'Este es el resumen de tu cartera.',
+      kContacts: 'Contactos', kCompanies: 'Empresas', kPipeline: 'Pipeline abierto', kPending: 'Actividades pendientes',
+      upcoming: 'Próximas actividades', noPending: 'Sin pendientes', noPendingTxt: 'No tenés actividades por hacer.',
+      recent: 'Contactos recientes', noContacts: 'Sin contactos', noContactsTxt: 'Creá tu primer contacto.', noCompany: 'Sin empresa', noContact: 'Sin contacto',
+      contactsSub: (n) => n + (n === 1 ? ' contacto en tu cartera' : ' contactos en tu cartera'),
+      newContact: 'Nuevo contacto', editContact: 'Editar contacto', savedContact: 'Contacto guardado',
+      all: 'Todos', filterState: 'Filtrar por estado',
+      cName: 'Nombre', cCompany: 'Empresa', cPhone: 'Teléfono', cEmail: 'Email', cState: 'Estado', cLast: 'Última interacción', cActions: 'Acciones',
+      noInteractions: 'Sin interacciones', noResults: 'Sin resultados', tryOther: 'Probá con otra búsqueda o filtro.', tryOtherSearch: 'Probá con otra búsqueda.',
+      emptyContacts: 'Todavía no hay contactos', emptyContactsTxt: 'Creá el primero para empezar.',
+      edit: 'Editar', del: 'Eliminar', editX: (n) => 'Editar ' + n, delX: (n) => 'Eliminar ' + n,
+      contactData: 'Datos del contacto', owner: 'Propietario', createDeal: 'Crear negocio',
+      logInteraction: 'Registrar interacción', type: 'Tipo', result: 'Resultado', note: 'Nota', notePh: 'Resumen de la conversación',
+      saveInteraction: 'Guardar interacción', savedInteraction: 'Interacción guardada',
+      deals: 'Negocios', history: 'Historial', scheduleAct: 'Programar actividad', noHistory: 'Sin historial', noHistoryTxt: 'Registrá la primera interacción con este contacto.',
+      editDeal: 'Editar negocio', companiesSub: (n) => n + (n === 1 ? ' cuenta' : ' cuentas'), newCompany: 'Nueva empresa', editCompany: 'Editar empresa', savedCompany: 'Empresa guardada',
+      noIndustry: 'Sin industria', nContacts: (n) => n + (n === 1 ? ' contacto' : ' contactos'), openPipeline: 'Pipeline abierto', seeContacts: 'Ver contactos',
+      emptyCompanies: 'Todavía no hay empresas', emptyCompaniesTxt: 'Creá la primera cuenta.',
+      dealsSub: (m) => 'Pipeline abierto: ' + m + '. Arrastrá las tarjetas para cambiar de etapa.', newDeal: 'Nuevo negocio', savedDeal: 'Negocio guardado', movedTo: (s) => 'Movido a ' + s,
+      actsSub: 'Llamadas, reuniones y tareas', newAct: 'Nueva actividad', editAct: 'Editar actividad', savedAct: 'Actividad guardada', filterActs: 'Filtrar actividades',
+      fPending: 'Pendientes', fDone: 'Completadas', fAll: 'Todas', nothing: 'Nada por acá', nothingPending: 'No tenés actividades pendientes.', nothingAll: 'No hay actividades para mostrar.',
+      markDone: 'Marcar como hecha', overdue: 'Vencida', actDone: 'Actividad completada', actReopen: 'Actividad reabierta',
+      today: 'Hoy', tomorrow: 'Mañana', yesterday: 'Ayer',
+      close: 'Cerrar', cancel: 'Cancelar', save: 'Guardar', required: 'Este campo es obligatorio.',
+      fFullName: 'Nombre y apellido', fJob: 'Cargo', fName: 'Nombre', fIndustry: 'Industria', fCity: 'Ciudad', fWeb: 'Sitio web',
+      fTitle: 'Título', fAmount: 'Monto (USD)', fStage: 'Etapa', fContact: 'Contacto', fDate: 'Fecha y hora', fSubject: 'Asunto', fDetail: 'Detalle',
+      confirmDel: (n) => '¿Eliminar "' + n + '"? Esta acción no se puede deshacer.', deleted: 'Eliminado',
+      confirmReset: '¿Restablecer los datos de demo? Se borra todo lo que creaste.', resetDone: 'Datos de demo restablecidos',
+      estado: { prospect: 'Prospecto', client: 'Cliente', inactive: 'Inactivo' },
+      etapa: { prospect: 'Prospecto', proposal: 'Propuesta', negotiation: 'Negociación', won: 'Ganado', lost: 'Perdido' },
+      tipo: { call: 'Llamada', meeting: 'Reunión', task: 'Tarea', email: 'Email', note: 'Nota' },
+      res: { interested: 'Interesado', callback: 'Volver a llamar', resolved: 'Resuelto', noanswer: 'No contesta' },
+      seed: {
+        job1: 'Gerente de Operaciones', job2: 'Jefe de Compras', job3: 'Directora de Atención al Paciente', job4: 'Gerente de Customer Experience', job5: 'CTO', job6: 'Gerente Comercial',
+        ind1: 'Consumo masivo', ind2: 'Logística', ind3: 'Salud', ind4: 'Retail', ind5: 'Servicios financieros', city4: 'Ciudad de México',
+        d1: 'Contact center de 40 puestos', d2: 'Migración de telefonía', d3: 'Omnicanalidad con WhatsApp', d4: 'AI Agent para soporte', d5: 'Ampliación de licencias',
+        a1: 'Seguimiento de propuesta', a2: 'Demo de uContact', a3: 'Enviar contrato firmado', a4: 'Consulta sobre ampliación de licencias', a5: 'Envío de propuesta AI Agent', a6: 'Kickoff de implementación', a7: 'Primer contacto',
+        a4d: 'Entrante, 6 min. Interesada en sumar 15 licencias.', a5d: 'Se adjuntó la propuesta en PDF.', a6d: 'Videollamada de 45 min.', a7d: 'Pidió cotización de migración.'
+      }
+    },
+    en: {
+      locale: 'en-US', navMain: 'Main navigation', role: 'Account executive', reset: 'Reset demo data',
+      search: 'Search', searchPh: 'Search by name, phone or company…', connected: 'Connected to uContact', language: 'Language',
+      tabs: { inicio: 'Home', contactos: 'Contacts', empresas: 'Companies', negocios: 'Deals', actividades: 'Activities' },
+      hello: 'Hi, Laura', helloSub: 'Here is an overview of your accounts.',
+      kContacts: 'Contacts', kCompanies: 'Companies', kPipeline: 'Open pipeline', kPending: 'Pending activities',
+      upcoming: 'Upcoming activities', noPending: 'Nothing pending', noPendingTxt: 'You have no activities to do.',
+      recent: 'Recent contacts', noContacts: 'No contacts', noContactsTxt: 'Create your first contact.', noCompany: 'No company', noContact: 'No contact',
+      contactsSub: (n) => n + (n === 1 ? ' contact in your accounts' : ' contacts in your accounts'),
+      newContact: 'New contact', editContact: 'Edit contact', savedContact: 'Contact saved',
+      all: 'All', filterState: 'Filter by status',
+      cName: 'Name', cCompany: 'Company', cPhone: 'Phone', cEmail: 'Email', cState: 'Status', cLast: 'Last interaction', cActions: 'Actions',
+      noInteractions: 'No interactions', noResults: 'No results', tryOther: 'Try a different search or filter.', tryOtherSearch: 'Try a different search.',
+      emptyContacts: 'No contacts yet', emptyContactsTxt: 'Create the first one to get started.',
+      edit: 'Edit', del: 'Delete', editX: (n) => 'Edit ' + n, delX: (n) => 'Delete ' + n,
+      contactData: 'Contact details', owner: 'Owner', createDeal: 'Create deal',
+      logInteraction: 'Log interaction', type: 'Type', result: 'Outcome', note: 'Note', notePh: 'Summary of the conversation',
+      saveInteraction: 'Save interaction', savedInteraction: 'Interaction saved',
+      deals: 'Deals', history: 'History', scheduleAct: 'Schedule activity', noHistory: 'No history', noHistoryTxt: 'Log the first interaction with this contact.',
+      editDeal: 'Edit deal', companiesSub: (n) => n + (n === 1 ? ' account' : ' accounts'), newCompany: 'New company', editCompany: 'Edit company', savedCompany: 'Company saved',
+      noIndustry: 'No industry', nContacts: (n) => n + (n === 1 ? ' contact' : ' contacts'), openPipeline: 'Open pipeline', seeContacts: 'View contacts',
+      emptyCompanies: 'No companies yet', emptyCompaniesTxt: 'Create the first account.',
+      dealsSub: (m) => 'Open pipeline: ' + m + '. Drag cards to change the stage.', newDeal: 'New deal', savedDeal: 'Deal saved', movedTo: (s) => 'Moved to ' + s,
+      actsSub: 'Calls, meetings and tasks', newAct: 'New activity', editAct: 'Edit activity', savedAct: 'Activity saved', filterActs: 'Filter activities',
+      fPending: 'Pending', fDone: 'Completed', fAll: 'All', nothing: 'Nothing here', nothingPending: 'You have no pending activities.', nothingAll: 'There are no activities to show.',
+      markDone: 'Mark as done', overdue: 'Overdue', actDone: 'Activity completed', actReopen: 'Activity reopened',
+      today: 'Today', tomorrow: 'Tomorrow', yesterday: 'Yesterday',
+      close: 'Close', cancel: 'Cancel', save: 'Save', required: 'This field is required.',
+      fFullName: 'Full name', fJob: 'Job title', fName: 'Name', fIndustry: 'Industry', fCity: 'City', fWeb: 'Website',
+      fTitle: 'Title', fAmount: 'Amount (USD)', fStage: 'Stage', fContact: 'Contact', fDate: 'Date and time', fSubject: 'Subject', fDetail: 'Details',
+      confirmDel: (n) => 'Delete "' + n + '"? This cannot be undone.', deleted: 'Deleted',
+      confirmReset: 'Reset the demo data? Everything you created will be erased.', resetDone: 'Demo data reset',
+      estado: { prospect: 'Prospect', client: 'Customer', inactive: 'Inactive' },
+      etapa: { prospect: 'Prospect', proposal: 'Proposal', negotiation: 'Negotiation', won: 'Won', lost: 'Lost' },
+      tipo: { call: 'Call', meeting: 'Meeting', task: 'Task', email: 'Email', note: 'Note' },
+      res: { interested: 'Interested', callback: 'Call back', resolved: 'Resolved', noanswer: 'No answer' },
+      seed: {
+        job1: 'Operations Manager', job2: 'Purchasing Manager', job3: 'Patient Care Director', job4: 'Customer Experience Manager', job5: 'CTO', job6: 'Sales Manager',
+        ind1: 'Consumer goods', ind2: 'Logistics', ind3: 'Healthcare', ind4: 'Retail', ind5: 'Financial services', city4: 'Mexico City',
+        d1: '40-seat contact center', d2: 'Phone system migration', d3: 'WhatsApp omnichannel', d4: 'AI Agent for support', d5: 'License expansion',
+        a1: 'Proposal follow-up', a2: 'uContact demo', a3: 'Send signed contract', a4: 'Question about license expansion', a5: 'AI Agent proposal sent', a6: 'Implementation kickoff', a7: 'First contact',
+        a4d: 'Inbound, 6 min. Interested in adding 15 licenses.', a5d: 'Proposal attached as PDF.', a6d: '45-minute video call.', a7d: 'Asked for a migration quote.'
+      }
+    },
+    pt: {
+      locale: 'pt-BR', navMain: 'Navegação principal', role: 'Executiva comercial', reset: 'Restaurar dados de demonstração',
+      search: 'Buscar', searchPh: 'Buscar por nome, telefone ou empresa…', connected: 'Conectado ao uContact', language: 'Idioma',
+      tabs: { inicio: 'Início', contactos: 'Contatos', empresas: 'Empresas', negocios: 'Negócios', actividades: 'Atividades' },
+      hello: 'Olá, Laura', helloSub: 'Este é o resumo da sua carteira.',
+      kContacts: 'Contatos', kCompanies: 'Empresas', kPipeline: 'Pipeline aberto', kPending: 'Atividades pendentes',
+      upcoming: 'Próximas atividades', noPending: 'Nada pendente', noPendingTxt: 'Você não tem atividades a fazer.',
+      recent: 'Contatos recentes', noContacts: 'Sem contatos', noContactsTxt: 'Crie seu primeiro contato.', noCompany: 'Sem empresa', noContact: 'Sem contato',
+      contactsSub: (n) => n + (n === 1 ? ' contato na sua carteira' : ' contatos na sua carteira'),
+      newContact: 'Novo contato', editContact: 'Editar contato', savedContact: 'Contato salvo',
+      all: 'Todos', filterState: 'Filtrar por status',
+      cName: 'Nome', cCompany: 'Empresa', cPhone: 'Telefone', cEmail: 'E-mail', cState: 'Status', cLast: 'Última interação', cActions: 'Ações',
+      noInteractions: 'Sem interações', noResults: 'Sem resultados', tryOther: 'Tente outra busca ou filtro.', tryOtherSearch: 'Tente outra busca.',
+      emptyContacts: 'Ainda não há contatos', emptyContactsTxt: 'Crie o primeiro para começar.',
+      edit: 'Editar', del: 'Excluir', editX: (n) => 'Editar ' + n, delX: (n) => 'Excluir ' + n,
+      contactData: 'Dados do contato', owner: 'Responsável', createDeal: 'Criar negócio',
+      logInteraction: 'Registrar interação', type: 'Tipo', result: 'Resultado', note: 'Nota', notePh: 'Resumo da conversa',
+      saveInteraction: 'Salvar interação', savedInteraction: 'Interação salva',
+      deals: 'Negócios', history: 'Histórico', scheduleAct: 'Agendar atividade', noHistory: 'Sem histórico', noHistoryTxt: 'Registre a primeira interação com este contato.',
+      editDeal: 'Editar negócio', companiesSub: (n) => n + (n === 1 ? ' conta' : ' contas'), newCompany: 'Nova empresa', editCompany: 'Editar empresa', savedCompany: 'Empresa salva',
+      noIndustry: 'Sem setor', nContacts: (n) => n + (n === 1 ? ' contato' : ' contatos'), openPipeline: 'Pipeline aberto', seeContacts: 'Ver contatos',
+      emptyCompanies: 'Ainda não há empresas', emptyCompaniesTxt: 'Crie a primeira conta.',
+      dealsSub: (m) => 'Pipeline aberto: ' + m + '. Arraste os cartões para mudar de etapa.', newDeal: 'Novo negócio', savedDeal: 'Negócio salvo', movedTo: (s) => 'Movido para ' + s,
+      actsSub: 'Ligações, reuniões e tarefas', newAct: 'Nova atividade', editAct: 'Editar atividade', savedAct: 'Atividade salva', filterActs: 'Filtrar atividades',
+      fPending: 'Pendentes', fDone: 'Concluídas', fAll: 'Todas', nothing: 'Nada por aqui', nothingPending: 'Você não tem atividades pendentes.', nothingAll: 'Não há atividades para mostrar.',
+      markDone: 'Marcar como concluída', overdue: 'Atrasada', actDone: 'Atividade concluída', actReopen: 'Atividade reaberta',
+      today: 'Hoje', tomorrow: 'Amanhã', yesterday: 'Ontem',
+      close: 'Fechar', cancel: 'Cancelar', save: 'Salvar', required: 'Este campo é obrigatório.',
+      fFullName: 'Nome completo', fJob: 'Cargo', fName: 'Nome', fIndustry: 'Setor', fCity: 'Cidade', fWeb: 'Site',
+      fTitle: 'Título', fAmount: 'Valor (USD)', fStage: 'Etapa', fContact: 'Contato', fDate: 'Data e hora', fSubject: 'Assunto', fDetail: 'Detalhes',
+      confirmDel: (n) => 'Excluir "' + n + '"? Esta ação não pode ser desfeita.', deleted: 'Excluído',
+      confirmReset: 'Restaurar os dados de demonstração? Tudo o que você criou será apagado.', resetDone: 'Dados de demonstração restaurados',
+      estado: { prospect: 'Prospect', client: 'Cliente', inactive: 'Inativo' },
+      etapa: { prospect: 'Prospecção', proposal: 'Proposta', negotiation: 'Negociação', won: 'Ganho', lost: 'Perdido' },
+      tipo: { call: 'Ligação', meeting: 'Reunião', task: 'Tarefa', email: 'E-mail', note: 'Nota' },
+      res: { interested: 'Interessado', callback: 'Ligar de volta', resolved: 'Resolvido', noanswer: 'Não atende' },
+      seed: {
+        job1: 'Gerente de Operações', job2: 'Gerente de Compras', job3: 'Diretora de Atendimento ao Paciente', job4: 'Gerente de Customer Experience', job5: 'CTO', job6: 'Gerente Comercial',
+        ind1: 'Bens de consumo', ind2: 'Logística', ind3: 'Saúde', ind4: 'Varejo', ind5: 'Serviços financeiros', city4: 'Cidade do México',
+        d1: 'Contact center de 40 posições', d2: 'Migração de telefonia', d3: 'Omnicanalidade com WhatsApp', d4: 'AI Agent para suporte', d5: 'Ampliação de licenças',
+        a1: 'Acompanhamento da proposta', a2: 'Demo do uContact', a3: 'Enviar contrato assinado', a4: 'Consulta sobre ampliação de licenças', a5: 'Envio da proposta AI Agent', a6: 'Kickoff da implementação', a7: 'Primeiro contato',
+        a4d: 'Recebida, 6 min. Interessada em adicionar 15 licenças.', a5d: 'Proposta anexada em PDF.', a6d: 'Videochamada de 45 min.', a7d: 'Pediu orçamento de migração.'
+      }
+    }
+  };
+
+  /* ---------- Storage (temporal, por navegador) ---------- */
+  const KEY = 'n2p-crm-demo-v2', LANG_KEY = 'n2p-crm-lang';
+  const store = {
+    load() { try { const r = localStorage.getItem(KEY); return r ? JSON.parse(r) : null; } catch (e) { return null; } },
+    save(d) { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {} },
+    clear() { try { localStorage.removeItem(KEY); } catch (e) {} }
+  };
+  function initialLang() {
+    try { const l = localStorage.getItem(LANG_KEY); if (I18N[l]) return l; } catch (e) {}
+    const nav = (navigator.language || 'es').slice(0, 2);
+    return I18N[nav] ? nav : 'es';
+  }
+  let lang = initialLang();
+  let T = I18N[lang];
+
+  const uid = () => Math.random().toString(36).slice(2, 10);
+  const now = () => new Date();
+  const at = (days, h, m) => { const d = now(); d.setDate(d.getDate() + days); d.setHours(h, m || 0, 0, 0); return d.toISOString(); };
+
+  /* Los datos de ejemplo guardan claves (_i) para que se traduzcan al cambiar de idioma.
+     Al editar un registro, el texto queda fijo tal como lo escribió el usuario. */
+  function seed() {
+    const e = [
+      { id: 'e1', nombre: 'Grupo Andino', _i: { industria: 'ind1' }, ciudad: 'Buenos Aires', telefono: '+54 11 4000-1200', web: 'grupoandino.com' },
+      { id: 'e2', nombre: 'LogiSur', _i: { industria: 'ind2' }, ciudad: 'Santiago', telefono: '+56 2 2345 6789', web: 'logisur.cl' },
+      { id: 'e3', nombre: 'Clínica Norte', _i: { industria: 'ind3' }, ciudad: 'Bogotá', telefono: '+57 601 555 0100', web: 'clinicanorte.co' },
+      { id: 'e4', nombre: 'Retail Plus', _i: { industria: 'ind4', ciudad: 'city4' }, telefono: '+52 55 1234 0000', web: 'retailplus.mx' },
+      { id: 'e5', nombre: 'FinaTech', _i: { industria: 'ind5' }, ciudad: 'Montevideo', telefono: '+598 2 900 1234', web: 'finatech.uy' }
+    ];
+    const c = [
+      { id: 'c1', nombre: 'Martina Ríos', _i: { cargo: 'job1' }, empresaId: 'e1', telefono: '+54 9 11 4567-2210', email: 'mrios@grupoandino.com', estado: 'client' },
+      { id: 'c2', nombre: 'Diego Fernández', _i: { cargo: 'job2' }, empresaId: 'e2', telefono: '+56 9 8765 4321', email: 'dfernandez@logisur.cl', estado: 'prospect' },
+      { id: 'c3', nombre: 'Camila Torres', _i: { cargo: 'job3' }, empresaId: 'e3', telefono: '+57 310 555 0192', email: 'ctorres@clinicanorte.co', estado: 'client' },
+      { id: 'c4', nombre: 'Andrés Molina', _i: { cargo: 'job4' }, empresaId: 'e4', telefono: '+52 55 1234 8890', email: 'amolina@retailplus.mx', estado: 'prospect' },
+      { id: 'c5', nombre: 'Valentina Sosa', _i: { cargo: 'job5' }, empresaId: 'e5', telefono: '+598 99 123 456', email: 'vsosa@finatech.uy', estado: 'inactive' },
+      { id: 'c6', nombre: 'Javier Paredes', _i: { cargo: 'job6' }, empresaId: 'e1', telefono: '+51 987 654 321', email: 'jparedes@grupoandino.com', estado: 'client' }
+    ];
+    const n = [
+      { id: 'n1', _i: { titulo: 'd1' }, empresaId: 'e4', contactoId: 'c4', monto: 18000, etapa: 'prospect' },
+      { id: 'n2', _i: { titulo: 'd2' }, empresaId: 'e2', contactoId: 'c2', monto: 9500, etapa: 'prospect' },
+      { id: 'n3', _i: { titulo: 'd3' }, empresaId: 'e3', contactoId: 'c3', monto: 12400, etapa: 'proposal' },
+      { id: 'n4', _i: { titulo: 'd4' }, empresaId: 'e1', contactoId: 'c1', monto: 26000, etapa: 'negotiation' },
+      { id: 'n5', _i: { titulo: 'd5' }, empresaId: 'e1', contactoId: 'c6', monto: 7200, etapa: 'won' }
+    ];
+    const a = [
+      { id: 'a1', tipo: 'call', _i: { titulo: 'a1' }, contactoId: 'c3', fecha: new Date(Date.now() + 2 * 3600000).toISOString(), hecha: false },
+      { id: 'a2', tipo: 'meeting', _i: { titulo: 'a2' }, contactoId: 'c4', fecha: at(1, 11, 30), hecha: false },
+      { id: 'a3', tipo: 'task', _i: { titulo: 'a3' }, contactoId: 'c1', fecha: at(2, 10), hecha: false },
+      { id: 'a4', tipo: 'call', _i: { titulo: 'a4', detalle: 'a4d' }, contactoId: 'c1', fecha: at(-3, 10, 42), hecha: true },
+      { id: 'a5', tipo: 'email', _i: { titulo: 'a5', detalle: 'a5d' }, contactoId: 'c1', fecha: at(-7, 9), hecha: true },
+      { id: 'a6', tipo: 'meeting', _i: { titulo: 'a6', detalle: 'a6d' }, contactoId: 'c6', fecha: at(-16, 16), hecha: true },
+      { id: 'a7', tipo: 'call', _i: { titulo: 'a7', detalle: 'a7d' }, contactoId: 'c2', fecha: at(-1, 12), hecha: true }
+    ];
+    return { empresas: e, contactos: c, negocios: n, actividades: a };
+  }
+
+  let db = store.load() || seed();
+  const persist = () => store.save(db);
+  const ui = { tab: 'inicio', query: '', estado: 'all', actFiltro: 'pending', contactoId: null };
+
+  /* ---------- Helpers ---------- */
+  const $ = (s, r) => (r || document).querySelector(s);
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+  const txt = (rec, f) => (rec && rec._i && rec._i[f] ? T.seed[rec._i[f]] : (rec && rec[f]) || '');
+  const actTitle = (a) => a.resultado ? T.tipo[a.tipo] + ': ' + T.res[a.resultado] : txt(a, 'titulo');
+  const empresa = (id) => db.empresas.find((x) => x.id === id);
+  const contacto = (id) => db.contactos.find((x) => x.id === id);
+  const iniciales = (n) => String(n || '?').trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+  const tints = ['t-blue', 't-purple', 't-pink'];
+  const tintFor = (id) => tints[[...String(id)].reduce((s, ch) => s + ch.charCodeAt(0), 0) % 3];
+  const money = (v) => 'USD ' + Number(v || 0).toLocaleString(T.locale);
+  const ESTADOS = ['prospect', 'client', 'inactive'];
+  const estadoTag = { client: 't-blue', prospect: 't-purple', inactive: 't-grey' };
+  const ETAPAS = ['prospect', 'proposal', 'negotiation', 'won', 'lost'];
+  const OPEN = (n) => n.etapa !== 'won' && n.etapa !== 'lost';
+  const TIPOS = ['call', 'meeting', 'task', 'email', 'note'];
+  const tipoTag = { call: 't-blue', meeting: 't-purple', task: 't-pink', email: 't-grey', note: 't-grey' };
+
+  function fmtFecha(iso) {
+    if (!iso) return '';
+    const d = new Date(iso), t = now();
+    const day = (x) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+    const diff = Math.round((day(d) - day(t)) / 86400000);
+    const hh = d.toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
+    if (diff === 0) return T.today + ' ' + hh;
+    if (diff === 1) return T.tomorrow + ' ' + hh;
+    if (diff === -1) return T.yesterday + ' ' + hh;
+    return d.toLocaleDateString(T.locale, { day: '2-digit', month: '2-digit' }) + ' ' + hh;
+  }
+  const toLocalInput = (iso) => { const d = iso ? new Date(iso) : now(); const p = (n) => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes()); };
+  const lastInteraction = (cid) => {
+    const list = db.actividades.filter((a) => a.contactoId === cid && a.hecha).sort((x, y) => y.fecha.localeCompare(x.fecha));
+    return list[0] ? T.tipo[list[0].tipo] + ' · ' + fmtFecha(list[0].fecha) : T.noInteractions;
+  };
+
+  let toastTimer;
+  function toast(msg) {
+    const old = $('.toast'); if (old) old.remove();
+    const t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role', 'status'); t.textContent = msg;
+    document.body.appendChild(t); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.remove(), 2600);
+  }
+
+  const ICON = {
+    inicio: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>',
+    contactos: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6"/><path d="M16 4a4 4 0 0 1 0 8"/><path d="M22 21c0-3-2-5-4-5.5"/></svg>',
+    empresas: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2"/></svg>',
+    negocios: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>',
+    actividades: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>',
+    plus: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
+    edit: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>',
+    trash: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>',
+    close: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    back: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>'
+  };
+
+  /* ---------- Static texts ---------- */
+  function applyStatic() {
+    document.documentElement.lang = lang === 'pt' ? 'pt-BR' : lang;
+    document.querySelectorAll('[data-i18n]').forEach((el) => { el.textContent = T[el.dataset.i18n]; });
+    document.querySelectorAll('[data-i18n-ph]').forEach((el) => { el.placeholder = T[el.dataset.i18nPh]; });
+    document.querySelectorAll('[data-i18n-aria]').forEach((el) => { el.setAttribute('aria-label', T[el.dataset.i18nAria]); });
+    $('#lang').value = lang;
+  }
+  function setLang(l) {
+    if (!I18N[l]) return;
+    lang = l; T = I18N[l];
+    try { localStorage.setItem(LANG_KEY, l); } catch (e) {}
+    applyStatic(); closeForm(); render();
+  }
+
+  /* ---------- Nav ---------- */
+  const TABS = ['inicio', 'contactos', 'empresas', 'negocios', 'actividades'];
+  function renderNav() {
+    const counts = { contactos: db.contactos.length, empresas: db.empresas.length, negocios: db.negocios.filter(OPEN).length, actividades: db.actividades.filter((a) => !a.hecha).length };
+    const active = ui.tab === 'ficha' ? 'contactos' : ui.tab;
+    $('#nav').innerHTML = TABS.map((k) =>
+      '<button type="button" class="nav-btn" data-action="tab" data-tab="' + k + '"' + (active === k ? ' aria-current="page"' : '') + '>' + ICON[k] + T.tabs[k] +
+      (counts[k] != null ? '<span class="count">' + counts[k] + '</span>' : '') + '</button>').join('');
+  }
+
+  /* ---------- Views ---------- */
+  const head = (title, sub, actions) => '<div class="head"><div><h1>' + title + '</h1>' + (sub ? '<p>' + sub + '</p>' : '') + '</div><div class="head-actions">' + (actions || '') + '</div></div>';
+  const empty = (title, text, action) => '<div class="empty"><b>' + title + '</b><span>' + text + '</span>' + (action || '') + '</div>';
+  const q = () => ui.query.trim().toLowerCase();
+  const btnNew = (action, label) => '<button type="button" class="btn primary" data-action="' + action + '">' + ICON.plus + label + '</button>';
+
+  function actRow(a, opts) {
+    opts = opts || {};
+    const c = contacto(a.contactoId), late = !a.hecha && new Date(a.fecha) < now(), det = txt(a, 'detalle');
+    return '<div class="act' + (a.hecha ? ' done' : '') + '">' +
+      (opts.check ? '<input type="checkbox" aria-label="' + T.markDone + '" data-action="toggle-act" data-id="' + a.id + '"' + (a.hecha ? ' checked' : '') + '>' : '') +
+      '<span class="tag ' + tipoTag[a.tipo] + '">' + esc(T.tipo[a.tipo]) + '</span>' +
+      '<div class="body"><b>' + esc(actTitle(a)) + '</b>' +
+      (opts.detail && det ? '<span class="muted">' + esc(det) + '</span>' : '') +
+      (c && !opts.hideContact ? '<button type="button" class="link" data-action="ficha" data-id="' + c.id + '">' + esc(c.nombre) + (empresa(c.empresaId) ? ', ' + esc(empresa(c.empresaId).nombre) : '') + '</button>' : '') +
+      '</div><span class="when' + (late ? ' late' : '') + '">' + (late ? T.overdue + ' · ' : '') + fmtFecha(a.fecha) + '</span>' +
+      (opts.edit ? '<button type="button" class="icon-btn" aria-label="' + T.editAct + '" data-action="edit-act" data-id="' + a.id + '">' + ICON.edit + '</button>' : '') +
+      '</div>';
+  }
+
+  function vInicio() {
+    const abiertos = db.negocios.filter(OPEN);
+    const pend = db.actividades.filter((a) => !a.hecha).sort((x, y) => x.fecha.localeCompare(y.fecha));
+    const recientes = db.contactos.slice(0, 5);
+    return head(T.hello, T.helloSub) +
+      '<div class="kpis">' +
+      '<button type="button" class="kpi" data-action="tab" data-tab="contactos"><span>' + T.kContacts + '</span><strong>' + db.contactos.length + '</strong></button>' +
+      '<button type="button" class="kpi" data-action="tab" data-tab="empresas"><span>' + T.kCompanies + '</span><strong>' + db.empresas.length + '</strong></button>' +
+      '<button type="button" class="kpi" data-action="tab" data-tab="negocios"><span>' + T.kPipeline + '</span><strong>' + money(abiertos.reduce((s, n) => s + Number(n.monto || 0), 0)) + '</strong></button>' +
+      '<button type="button" class="kpi" data-action="tab" data-tab="actividades"><span>' + T.kPending + '</span><strong>' + pend.length + '</strong></button>' +
+      '</div><div class="grid2">' +
+      '<section class="card pad"><h2>' + T.upcoming + '</h2><div class="acts">' +
+      (pend.length ? pend.slice(0, 5).map((a) => actRow(a)).join('') : empty(T.noPending, T.noPendingTxt)) +
+      '</div></section>' +
+      '<section class="card pad"><h2>' + T.recent + '</h2><div class="acts">' +
+      (recientes.length ? recientes.map((c) => '<div class="act"><span class="av ' + tintFor(c.id) + '">' + iniciales(c.nombre) + '</span><div class="body"><button type="button" class="link" data-action="ficha" data-id="' + c.id + '">' + esc(c.nombre) + '</button><span class="muted">' + esc((empresa(c.empresaId) || {}).nombre || T.noCompany) + '</span></div><span class="tag ' + estadoTag[c.estado] + '">' + esc(T.estado[c.estado]) + '</span></div>').join('') : empty(T.noContacts, T.noContactsTxt)) +
+      '</div></section></div>';
+  }
+
+  function vContactos() {
+    const s = q();
+    const digits = s.replace(/\D/g, '');
+    const list = db.contactos.filter((c) => {
+      if (ui.estado !== 'all' && c.estado !== ui.estado) return false;
+      if (!s) return true;
+      const e = empresa(c.empresaId);
+      return [c.nombre, c.telefono, c.email, txt(c, 'cargo'), e && e.nombre].join(' ').toLowerCase().includes(s) ||
+        (digits.length > 2 && String(c.telefono).replace(/\D/g, '').includes(digits));
+    });
+    const chips = ['all'].concat(ESTADOS).map((e) => '<button type="button" class="chip" data-action="estado" data-v="' + e + '" aria-pressed="' + (ui.estado === e) + '">' + (e === 'all' ? T.all : T.estado[e]) + '</button>').join('');
+    const filtered = s || ui.estado !== 'all';
+    return head(T.tabs.contactos, T.contactsSub(db.contactos.length), btnNew('new-contacto', T.newContact)) +
+      '<div class="filters" role="group" aria-label="' + T.filterState + '">' + chips + '</div>' +
+      '<div class="card table-wrap">' + (list.length ?
+        '<table><thead><tr><th>' + T.cName + '</th><th>' + T.cCompany + '</th><th>' + T.cPhone + '</th><th>' + T.cEmail + '</th><th>' + T.cState + '</th><th>' + T.cLast + '</th><th><span class="sr-only">' + T.cActions + '</span></th></tr></thead><tbody>' +
+        list.map((c) => {
+          const e = empresa(c.empresaId), cargo = txt(c, 'cargo');
+          return '<tr><td><div class="who"><span class="av ' + tintFor(c.id) + '">' + iniciales(c.nombre) + '</span><div><button type="button" class="link" data-action="ficha" data-id="' + c.id + '">' + esc(c.nombre) + '</button>' + (cargo ? '<div class="muted" style="font-size:12px">' + esc(cargo) + '</div>' : '') + '</div></div></td>' +
+            '<td>' + (e ? esc(e.nombre) : '<span class="muted">—</span>') + '</td><td class="num">' + esc(c.telefono) + '</td><td class="muted">' + esc(c.email) + '</td>' +
+            '<td><span class="tag ' + estadoTag[c.estado] + '">' + esc(T.estado[c.estado]) + '</span></td><td class="muted">' + lastInteraction(c.id) + '</td>' +
+            '<td><div class="row-actions"><button type="button" class="icon-btn" aria-label="' + esc(T.editX(c.nombre)) + '" data-action="edit-contacto" data-id="' + c.id + '">' + ICON.edit + '</button><button type="button" class="icon-btn" aria-label="' + esc(T.delX(c.nombre)) + '" data-action="del-contacto" data-id="' + c.id + '">' + ICON.trash + '</button></div></td></tr>';
+        }).join('') + '</tbody></table>'
+        : empty(filtered ? T.noResults : T.emptyContacts, filtered ? T.tryOther : T.emptyContactsTxt, btnNew('new-contacto', T.newContact))) +
+      '</div>';
+  }
+
+  function vFicha() {
+    const c = contacto(ui.contactoId);
+    if (!c) { ui.tab = 'contactos'; return vContactos(); }
+    const e = empresa(c.empresaId);
+    const hist = db.actividades.filter((a) => a.contactoId === c.id).sort((x, y) => y.fecha.localeCompare(x.fecha));
+    const negs = db.negocios.filter((n) => n.contactoId === c.id);
+    const ciudad = e ? txt(e, 'ciudad') : '';
+    return '<button type="button" class="back" data-action="tab" data-tab="contactos">' + ICON.back + T.tabs.contactos + '</button>' +
+      '<div class="profile">' +
+      '<section class="card pad profile-card" aria-label="' + T.contactData + '">' +
+      '<div class="who"><span class="av lg ' + tintFor(c.id) + '">' + iniciales(c.nombre) + '</span><div><div style="font-size:20px;font-weight:800;line-height:1.25">' + esc(c.nombre) + '</div><div class="muted">' + esc([txt(c, 'cargo'), e && e.nombre].filter(Boolean).join(', ')) + '</div></div></div>' +
+      '<div><span class="tag ' + estadoTag[c.estado] + '">' + esc(T.estado[c.estado]) + '</span></div>' +
+      '<div class="fields"><div><span>' + T.cPhone + '</span><b class="num">' + (esc(c.telefono) || '—') + '</b></div><div><span>' + T.cEmail + '</span><b>' + (esc(c.email) || '—') + '</b></div><div><span>' + T.cCompany + '</span><b>' + (e ? esc(e.nombre) + (ciudad ? ', ' + esc(ciudad) : '') : '—') + '</b></div><div><span>' + T.owner + '</span><b>Laura Gómez</b></div></div>' +
+      '<div style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" class="btn primary" style="flex:1" data-action="edit-contacto" data-id="' + c.id + '">' + T.edit + '</button><button type="button" class="btn" style="flex:1" data-action="new-negocio" data-contacto="' + c.id + '">' + T.createDeal + '</button></div>' +
+      '</section>' +
+      '<div class="profile-main">' +
+      '<section class="card pad" aria-label="' + T.logInteraction + '"><h2>' + T.logInteraction + '</h2>' +
+      '<form id="quick" style="display:flex;flex-direction:column;gap:12px" novalidate>' +
+      '<div class="form-row"><label class="f">' + T.type + '<select name="tipo">' + ['call', 'email', 'meeting', 'note'].map((t) => '<option value="' + t + '">' + T.tipo[t] + '</option>').join('') + '</select></label>' +
+      '<label class="f">' + T.result + '<select name="resultado">' + Object.keys(T.res).map((r) => '<option value="' + r + '">' + T.res[r] + '</option>').join('') + '</select></label></div>' +
+      '<label class="f">' + T.note + '<textarea name="detalle" rows="3" placeholder="' + T.notePh + '"></textarea></label>' +
+      '<div style="display:flex;justify-content:flex-end"><button type="submit" class="btn primary">' + T.saveInteraction + '</button></div>' +
+      '</form></section>' +
+      (negs.length ? '<section class="card pad"><h2>' + T.deals + '</h2><div class="acts">' + negs.map((n) => '<div class="act"><span class="tag t-purple">' + esc(T.etapa[n.etapa]) + '</span><div class="body"><b>' + esc(txt(n, 'titulo')) + '</b></div><span class="num" style="font-weight:700">' + money(n.monto) + '</span><button type="button" class="icon-btn" aria-label="' + T.editDeal + '" data-action="edit-negocio" data-id="' + n.id + '">' + ICON.edit + '</button></div>').join('') + '</div></section>' : '') +
+      '<section class="card pad"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><h2>' + T.history + '</h2><button type="button" class="btn sm" data-action="new-act" data-contacto="' + c.id + '">' + ICON.plus + T.scheduleAct + '</button></div><div class="acts">' +
+      (hist.length ? hist.map((a) => actRow(a, { detail: true, hideContact: true, check: !a.hecha, edit: true })).join('') : empty(T.noHistory, T.noHistoryTxt)) +
+      '</div></section></div></div>';
+  }
+
+  function vEmpresas() {
+    const s = q();
+    const list = db.empresas.filter((e) => !s || [e.nombre, txt(e, 'industria'), txt(e, 'ciudad')].join(' ').toLowerCase().includes(s));
+    return head(T.tabs.empresas, T.companiesSub(db.empresas.length), btnNew('new-empresa', T.newCompany)) +
+      (list.length ? '<div class="companies">' + list.map((e) => {
+        const nc = db.contactos.filter((c) => c.empresaId === e.id).length;
+        const pipe = db.negocios.filter((n) => n.empresaId === e.id && OPEN(n)).reduce((s2, n) => s2 + Number(n.monto || 0), 0);
+        return '<article class="card company"><div class="company-top"><span class="logo-sq">' + esc(e.nombre[0] || '?') + '</span><div><b>' + esc(e.nombre) + '</b><div class="muted" style="font-size:13px">' + (esc(txt(e, 'industria')) || T.noIndustry) + '</div></div></div>' +
+          '<div class="company-meta"><span>' + (esc(txt(e, 'ciudad')) || '—') + '</span><span>' + T.nContacts(nc) + '</span></div>' +
+          '<div class="company-meta"><span>' + T.openPipeline + '</span><b style="color:var(--navy)">' + money(pipe) + '</b></div>' +
+          '<div class="company-foot"><button type="button" class="btn sm" style="flex:1" data-action="empresa-contactos" data-id="' + e.id + '">' + T.seeContacts + '</button><button type="button" class="icon-btn" aria-label="' + esc(T.editX(e.nombre)) + '" data-action="edit-empresa" data-id="' + e.id + '">' + ICON.edit + '</button><button type="button" class="icon-btn" aria-label="' + esc(T.delX(e.nombre)) + '" data-action="del-empresa" data-id="' + e.id + '">' + ICON.trash + '</button></div></article>';
+      }).join('') + '</div>' : '<div class="card">' + empty(s ? T.noResults : T.emptyCompanies, s ? T.tryOtherSearch : T.emptyCompaniesTxt, btnNew('new-empresa', T.newCompany)) + '</div>');
+  }
+
+  function vNegocios() {
+    const s = q();
+    const list = db.negocios.filter((n) => { const e = empresa(n.empresaId); return !s || [txt(n, 'titulo'), e && e.nombre].join(' ').toLowerCase().includes(s); });
+    const abierto = list.filter(OPEN).reduce((t, n) => t + Number(n.monto || 0), 0);
+    return head(T.tabs.negocios, T.dealsSub(money(abierto)), btnNew('new-negocio', T.newDeal)) +
+      '<div class="board">' + ETAPAS.map((et) => {
+        const items = list.filter((n) => n.etapa === et);
+        return '<div class="col" data-etapa="' + et + '"><div class="col-head"><span>' + T.etapa[et] + '</span><small>' + items.length + ' · ' + money(items.reduce((t, n) => t + Number(n.monto || 0), 0)) + '</small></div>' +
+          items.map((n) => { const e = empresa(n.empresaId); return '<button type="button" class="deal" draggable="true" data-id="' + n.id + '" data-action="edit-negocio"><b>' + esc(txt(n, 'titulo')) + '</b><span class="muted" style="font-size:13px">' + (e ? esc(e.nombre) : T.noCompany) + '</span><span class="amt num">' + money(n.monto) + '</span></button>'; }).join('') +
+          '</div>';
+      }).join('') + '</div>';
+  }
+
+  function vActividades() {
+    const s = q();
+    let list = db.actividades.filter((a) => { const c = contacto(a.contactoId); return !s || [actTitle(a), T.tipo[a.tipo], c && c.nombre].join(' ').toLowerCase().includes(s); });
+    if (ui.actFiltro === 'pending') list = list.filter((a) => !a.hecha).sort((x, y) => x.fecha.localeCompare(y.fecha));
+    else if (ui.actFiltro === 'done') list = list.filter((a) => a.hecha).sort((x, y) => y.fecha.localeCompare(x.fecha));
+    else list = list.sort((x, y) => y.fecha.localeCompare(x.fecha));
+    const labels = { pending: T.fPending, done: T.fDone, all: T.fAll };
+    const chips = ['pending', 'done', 'all'].map((f) => '<button type="button" class="chip" data-action="act-filtro" data-v="' + f + '" aria-pressed="' + (ui.actFiltro === f) + '">' + labels[f] + '</button>').join('');
+    return head(T.tabs.actividades, T.actsSub, btnNew('new-act', T.newAct)) +
+      '<div class="filters" role="group" aria-label="' + T.filterActs + '">' + chips + '</div>' +
+      '<section class="card" style="padding:4px 24px"><div class="acts strike">' +
+      (list.length ? list.map((a) => actRow(a, { check: true, edit: true, detail: true })).join('') : empty(T.nothing, ui.actFiltro === 'pending' ? T.nothingPending : T.nothingAll)) +
+      '</div></section>';
+  }
+
+  const VIEWS = { inicio: vInicio, contactos: vContactos, ficha: vFicha, empresas: vEmpresas, negocios: vNegocios, actividades: vActividades };
+  function render() { renderNav(); $('#view').innerHTML = VIEWS[ui.tab](); bindBoard(); bindQuick(); }
+  function go(tab) { ui.tab = tab; render(); $('#view').focus({ preventScroll: true }); window.scrollTo(0, 0); }
+
+  /* ---------- Drawer / forms ---------- */
+  const opt = (list, val, emptyLabel) => (emptyLabel ? '<option value="">' + esc(emptyLabel) + '</option>' : '') + list.map((o) => '<option value="' + esc(o.v) + '"' + (String(o.v) === String(val) ? ' selected' : '') + '>' + esc(o.l) + '</option>').join('');
+  const dict = (keys, d) => keys.map((k) => ({ v: k, l: d[k] }));
+  const inp = (label, name, val, type, extra) => '<label class="f">' + label + '<input name="' + name + '" type="' + (type || 'text') + '" value="' + esc(val) + '"' + (extra || '') + '></label>';
+  const sel = (label, name, options) => '<label class="f">' + label + '<select name="' + name + '">' + options + '</select></label>';
+  const err = (k) => '<div class="err" data-err="' + k + '"></div>';
+  const empOpts = (v) => opt(db.empresas.map((e) => ({ v: e.id, l: e.nombre })), v, T.noCompany);
+  const conOpts = (v) => opt(db.contactos.map((c) => ({ v: c.id, l: c.nombre })), v, T.noContact);
+
+  const FORMS = {
+    contacto: {
+      col: 'contactos', tNew: 'newContact', tEdit: 'editContact', saved: 'savedContact', required: ['nombre'],
+      body: (r) => inp(T.fFullName, 'nombre', r.nombre, 'text', ' required autocomplete="off"') + err('nombre') +
+        inp(T.fJob, 'cargo', txt(r, 'cargo')) +
+        '<div class="form-row">' + inp(T.cPhone, 'telefono', r.telefono, 'tel', ' placeholder="+54 9 11 …"') + inp(T.cEmail, 'email', r.email, 'email') + '</div>' +
+        sel(T.cCompany, 'empresaId', empOpts(r.empresaId)) + sel(T.cState, 'estado', opt(dict(ESTADOS, T.estado), r.estado || 'prospect'))
+    },
+    empresa: {
+      col: 'empresas', tNew: 'newCompany', tEdit: 'editCompany', saved: 'savedCompany', required: ['nombre'],
+      body: (r) => inp(T.fName, 'nombre', r.nombre, 'text', ' required autocomplete="off"') + err('nombre') +
+        '<div class="form-row">' + inp(T.fIndustry, 'industria', txt(r, 'industria')) + inp(T.fCity, 'ciudad', txt(r, 'ciudad')) + '</div>' +
+        '<div class="form-row">' + inp(T.cPhone, 'telefono', r.telefono, 'tel') + inp(T.fWeb, 'web', r.web) + '</div>'
+    },
+    negocio: {
+      col: 'negocios', tNew: 'newDeal', tEdit: 'editDeal', saved: 'savedDeal', required: ['titulo'],
+      body: (r) => inp(T.fTitle, 'titulo', txt(r, 'titulo'), 'text', ' required autocomplete="off"') + err('titulo') +
+        '<div class="form-row">' + inp(T.fAmount, 'monto', r.monto, 'number', ' min="0" step="100"') + sel(T.fStage, 'etapa', opt(dict(ETAPAS, T.etapa), r.etapa || 'prospect')) + '</div>' +
+        sel(T.cCompany, 'empresaId', empOpts(r.empresaId)) + sel(T.fContact, 'contactoId', conOpts(r.contactoId))
+    },
+    actividad: {
+      col: 'actividades', tNew: 'newAct', tEdit: 'editAct', saved: 'savedAct', required: ['titulo'],
+      body: (r) => '<div class="form-row">' + sel(T.type, 'tipo', opt(dict(TIPOS, T.tipo), r.tipo || 'call')) + inp(T.fDate, 'fecha', toLocalInput(r.fecha), 'datetime-local') + '</div>' +
+        inp(T.fSubject, 'titulo', r.id ? actTitle(r) : '', 'text', ' required autocomplete="off"') + err('titulo') +
+        sel(T.fContact, 'contactoId', conOpts(r.contactoId)) +
+        '<label class="f">' + T.fDetail + '<textarea name="detalle" rows="3">' + esc(txt(r, 'detalle')) + '</textarea></label>' +
+        '<label style="display:flex;gap:10px;align-items:center;font-weight:600;font-size:13px"><input type="checkbox" name="hecha" style="width:20px;height:20px;accent-color:#002540"' + (r.hecha ? ' checked' : '') + '>' + T.markDone + '</label>'
+    }
+  };
+
+  let lastFocus = null;
+  function openForm(kind, id, preset) {
+    const F = FORMS[kind];
+    const rec = id ? db[F.col].find((x) => x.id === id) : Object.assign({}, preset || {});
+    lastFocus = document.activeElement;
+    $('#layer').innerHTML = '<div class="overlay" data-action="overlay"><form class="drawer" role="dialog" aria-modal="true" aria-labelledby="dt" novalidate data-kind="' + kind + '" data-id="' + (id || '') + '">' +
+      '<div class="drawer-head"><h2 id="dt">' + (id ? T[F.tEdit] : T[F.tNew]) + '</h2><button type="button" class="icon-btn" aria-label="' + T.close + '" data-action="close">' + ICON.close + '</button></div>' +
+      '<div class="drawer-body">' + F.body(rec) + '</div>' +
+      '<div class="drawer-foot">' + (id ? '<button type="button" class="btn danger" data-action="del-' + kind + '" data-id="' + id + '">' + T.del + '</button>' : '<button type="button" class="btn" data-action="close">' + T.cancel + '</button>') +
+      '<button type="submit" class="btn primary">' + T.save + '</button></div></form></div>';
+    const f = $('#layer form');
+    f.addEventListener('submit', (ev) => { ev.preventDefault(); saveForm(f); });
+    setTimeout(() => { const first = f.querySelector('input:not([type=checkbox]),select'); if (first) first.focus(); }, 30);
+  }
+  function closeForm() { const had = $('#layer').innerHTML; $('#layer').innerHTML = ''; if (had && lastFocus && document.body.contains(lastFocus)) lastFocus.focus(); }
+
+  function saveForm(f) {
+    const kind = f.dataset.kind, id = f.dataset.id, F = FORMS[kind];
+    const data = {};
+    f.querySelectorAll('input,select,textarea').forEach((el) => { if (el.name) data[el.name] = el.type === 'checkbox' ? el.checked : el.value.trim(); });
+    let ok = true;
+    F.required.forEach((k) => { const box = f.querySelector('[data-err="' + k + '"]'); if (!data[k]) { ok = false; if (box) box.textContent = T.required; } else if (box) box.textContent = ''; });
+    if (!ok) { f.querySelector('[name="' + F.required[0] + '"]').focus(); return; }
+    if (kind === 'negocio') { data.monto = Number(data.monto) || 0; if (!data.empresaId && data.contactoId) data.empresaId = (contacto(data.contactoId) || {}).empresaId || ''; }
+    if (kind === 'actividad') data.fecha = data.fecha ? new Date(data.fecha).toISOString() : now().toISOString();
+    if (id) {
+      const rec = db[F.col].find((x) => x.id === id);
+      // Solo se fija el texto de los campos que el usuario cambió
+      if (rec._i) Object.keys(rec._i).forEach((k) => { if (data[k] === T.seed[rec._i[k]]) delete data[k]; else delete rec._i[k]; });
+      if (kind === 'actividad' && rec.resultado) { if (data.titulo === actTitle(rec)) delete data.titulo; else delete rec.resultado; }
+      Object.assign(rec, data);
+    } else db[F.col].unshift(Object.assign({ id: uid() }, data));
+    persist(); closeForm(); render(); toast(T[F.saved]);
+  }
+
+  function remove(kind, id) {
+    const F = FORMS[kind]; const rec = db[F.col].find((x) => x.id === id); if (!rec) return;
+    const name = rec.nombre || (kind === 'actividad' ? actTitle(rec) : txt(rec, 'titulo'));
+    if (!confirm(T.confirmDel(name))) return;
+    db[F.col] = db[F.col].filter((x) => x.id !== id);
+    if (kind === 'contacto') { db.actividades = db.actividades.filter((a) => a.contactoId !== id); db.negocios.forEach((n) => { if (n.contactoId === id) n.contactoId = ''; }); if (ui.contactoId === id) ui.tab = 'contactos'; }
+    if (kind === 'empresa') { db.contactos.forEach((c) => { if (c.empresaId === id) c.empresaId = ''; }); db.negocios.forEach((n) => { if (n.empresaId === id) n.empresaId = ''; }); }
+    persist(); closeForm(); render(); toast(T.deleted);
+  }
+
+  /* ---------- Quick interaction (ficha) ---------- */
+  function bindQuick() {
+    const f = $('#quick'); if (!f) return;
+    f.addEventListener('submit', (ev) => {
+      ev.preventDefault();
+      db.actividades.unshift({ id: uid(), tipo: f.tipo.value, resultado: f.resultado.value, contactoId: ui.contactoId, fecha: now().toISOString(), hecha: true, detalle: f.detalle.value.trim() });
+      persist(); render(); toast(T.savedInteraction);
+    });
+  }
+
+  /* ---------- Kanban drag & drop ---------- */
+  function bindBoard() {
+    document.querySelectorAll('.deal').forEach((d) => {
+      d.addEventListener('dragstart', (e) => { d.classList.add('dragging'); e.dataTransfer.setData('text/plain', d.dataset.id); e.dataTransfer.effectAllowed = 'move'; });
+      d.addEventListener('dragend', () => d.classList.remove('dragging'));
+    });
+    document.querySelectorAll('.col').forEach((col) => {
+      col.addEventListener('dragover', (e) => { e.preventDefault(); col.classList.add('over'); });
+      col.addEventListener('dragleave', () => col.classList.remove('over'));
+      col.addEventListener('drop', (e) => {
+        e.preventDefault(); col.classList.remove('over');
+        const n = db.negocios.find((x) => x.id === e.dataTransfer.getData('text/plain'));
+        if (n && n.etapa !== col.dataset.etapa) { n.etapa = col.dataset.etapa; persist(); render(); toast(T.movedTo(T.etapa[n.etapa])); }
+      });
+    });
+  }
+
+  /* ---------- Events ---------- */
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-action]'); if (!t) return;
+    const a = t.dataset.action, id = t.dataset.id;
+    if (a === 'overlay') { if (e.target === t) closeForm(); return; }
+    if (a === 'tab') return go(t.dataset.tab);
+    if (a === 'ficha') { ui.contactoId = id; closeForm(); return go('ficha'); }
+    if (a === 'estado') { ui.estado = t.dataset.v; return render(); }
+    if (a === 'act-filtro') { ui.actFiltro = t.dataset.v; return render(); }
+    if (a === 'close') return closeForm();
+    if (a === 'new-contacto') return openForm('contacto');
+    if (a === 'edit-contacto') return openForm('contacto', id);
+    if (a === 'del-contacto') return remove('contacto', id);
+    if (a === 'new-empresa') return openForm('empresa');
+    if (a === 'edit-empresa') return openForm('empresa', id);
+    if (a === 'del-empresa') return remove('empresa', id);
+    if (a === 'empresa-contactos') { const em = empresa(id); ui.query = em ? em.nombre : ''; $('#search').value = ui.query; ui.estado = 'all'; return go('contactos'); }
+    if (a === 'new-negocio') { const c = contacto(t.dataset.contacto); return openForm('negocio', null, c ? { contactoId: c.id, empresaId: c.empresaId } : null); }
+    if (a === 'edit-negocio') return openForm('negocio', id);
+    if (a === 'del-negocio') return remove('negocio', id);
+    if (a === 'new-act') return openForm('actividad', null, { contactoId: t.dataset.contacto || '', fecha: now().toISOString() });
+    if (a === 'edit-act') return openForm('actividad', id);
+    if (a === 'del-actividad') return remove('actividad', id);
+    if (a === 'reset') {
+      if (!confirm(T.confirmReset)) return;
+      store.clear(); db = seed(); ui.query = ''; $('#search').value = ''; ui.estado = 'all'; persist(); go('inicio'); toast(T.resetDone);
+    }
+  });
+  document.addEventListener('change', (e) => {
+    if (e.target.id === 'lang') return setLang(e.target.value);
+    if (e.target.matches('[data-action="toggle-act"]')) {
+      const act = db.actividades.find((x) => x.id === e.target.dataset.id);
+      if (act) { act.hecha = e.target.checked; persist(); render(); toast(act.hecha ? T.actDone : T.actReopen); }
+    }
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('#layer').innerHTML) closeForm(); });
+  let qTimer;
+  $('#search').addEventListener('input', (e) => {
+    clearTimeout(qTimer);
+    qTimer = setTimeout(() => {
+      ui.query = e.target.value;
+      if (ui.tab === 'inicio' || ui.tab === 'ficha') ui.tab = 'contactos';
+      render();
+    }, 120);
+  });
+
+  persist();
+  applyStatic();
+  render();
+})();
+</script>
+</body>
+</html>
